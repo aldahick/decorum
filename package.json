@@ -1,0 +1,27 @@
+{
+  "name": "@aldahick/decorum",
+  "version": "0.1.0",
+  "description": "Decorators, but classier",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "mocha dist/tests.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aldahick/decorum.git"
+  },
+  "author": "Alex Hicks <alex@alexhicks.net> (https://alexhicks.net)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aldahick/decorum/issues"
+  },
+  "homepage": "https://github.com/aldahick/decorum#readme",
+  "devDependencies": {
+    "@aldahick/tslint-rules": "0.0.2",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.12.21",
+    "mocha": "^5.2.0",
+    "tslint": "^5.12.1",
+    "typescript": "^3.3.1"
+  }
+}
