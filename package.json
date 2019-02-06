@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "compile": "tsc",
+    "lint": "tslint -p .",
     "test": "mocha dist/tests.js"
   },
   "repository": {
@@ -28,6 +29,7 @@
     "@types/node": "^10.12.21",
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
+    "mocha-junit-reporter": "^1.18.0",
     "tslint": "^5.12.1",
     "typescript": "^3.3.1"
   }

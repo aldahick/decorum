@@ -1,0 +1,33 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:10.15
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - dependencies-{{ checksum "package.json" }}
+          - dependencies-
+      - run:
+          name: Install NPM modules
+          command: npm i
+      - save_cache:
+          paths:
+            - node_modules
+          key: dependencies-{{ checksum "package.json" }}
+      - run:
+          name: Compile
+          command: npm run compile
+      - run:
+          name: Lint
+          command: npm run lint
+      - run:
+          name: Unit Tests
+          command: npm run test -- --reporter=mocha-junit-reporter
+          environment:
+            MOCHA_FILE: /home/circleci/junit/test-results.xml
+      - store_test_results:
+          path: /home/circleci/junit
+      - store_artifacts:
+          path: /home/circleci/junit
