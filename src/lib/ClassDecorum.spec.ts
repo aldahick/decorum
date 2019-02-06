@@ -19,4 +19,33 @@ describe("ClassDecorum", () => {
       }
     }]);
   });
+  it("should not require binding .decorator", () => {
+    const decorum = new ClassDecorum();
+    const decorator = decorum.decorator;
+    @decorator()
+    class DecorumSubject { }
+    expect(decorum.uses).to.deep.equal([{
+      result: undefined,
+      args: [],
+      target: {
+        name: "DecorumSubject",
+        constructor: DecorumSubject,
+        methodNames: []
+      }
+    }]);
+  });
+  it("should accept arguments", () => {
+    const decorum = new ClassDecorum<[string]>();
+    @decorum.decorator("foo")
+    class DecorumSubject { }
+    expect(decorum.uses).to.deep.equal([{
+      result: undefined,
+      args: ["foo"],
+      target: {
+        name: "DecorumSubject",
+        constructor: DecorumSubject,
+        methodNames: []
+      }
+    }]);
+  });
 });
