@@ -5,7 +5,7 @@ export type MethodTarget = {
   name: string;
   constructor: any;
   params: {[key: string]: Function};
-  return: Function;
+  return?: Function;
 };
 
 export class MethodDecorum<Args extends any[] = [], ProcessResult = undefined>

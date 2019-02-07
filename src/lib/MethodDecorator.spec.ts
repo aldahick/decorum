@@ -1,59 +1,71 @@
 import { expect } from "chai";
-import { MethodDecorum } from "./MethodDecorum";
+import { MethodDecorum, MethodTarget } from "./MethodDecorum";
+
+function getBaseEquivalencyClass<Args extends any[], Return>(
+  decorum: MethodDecorum<Args, Return>,
+  partial: Partial<(typeof decorum)["uses"][0]> & {
+    target: MethodTarget
+  }
+): (typeof decorum)["uses"][0] {
+  return {
+    result: undefined,
+    args: [] as any,
+    ...partial
+  };
+}
 
 describe("MethodDecorum", () => {
   it("should work", () => {
     const decorum = new MethodDecorum();
     class DecorumSubject {
       @decorum.decorator()
-      foo(bar: string): number { return Number(bar); }
+      foo(): void { }
     }
-    expect(decorum.uses).to.deep.equal([{
-      result: undefined,
-      args: [],
-      target: {
-        name: "foo",
-        constructor: DecorumSubject.prototype,
-        params: {
-          bar: String
-        },
-        return: Number
-      }
-    }]);
+    expect(decorum.uses).to.deep.equal([
+      getBaseEquivalencyClass(decorum, {
+        target: {
+          name: "foo",
+          constructor: DecorumSubject.prototype,
+          params: {},
+          return: undefined
+        }
+      })
+    ]);
   });
   it("should not require binding .decorator", () => {
     const decorum = new MethodDecorum();
     const decorator = decorum.decorator;
     class DecorumSubject {
       @decorator()
-      foo() { }
+      foo(): void { }
     }
-    expect(decorum.uses).to.deep.equal([{
-      result: undefined,
-      args: [],
-      target: {
-        name: "foo",
-        constructor: DecorumSubject.prototype,
-        params: {},
-        return: undefined
-      }
-    }]);
+    expect(decorum.uses).to.deep.equal([
+      getBaseEquivalencyClass(decorum, {
+        target: {
+          name: "foo",
+          constructor: DecorumSubject.prototype,
+          params: {},
+          return: undefined
+        }
+      })
+    ]);
   });
   it("should accept arguments", () => {
     const decorum = new MethodDecorum<[string]>();
     class DecorumSubject {
-      @decorum.decorator("foo")
-      bar() { }
+      @decorum.decorator("bar")
+      foo() { }
     }
-    expect(decorum.uses).to.deep.equal([{
-      result: undefined,
-      args: ["foo"],
-      target: {
-        name: "bar",
-        constructor: DecorumSubject.prototype,
-        params: {},
-        return: undefined
-      }
-    }]);
+    expect(decorum.uses).to.deep.equal([
+      getBaseEquivalencyClass(decorum, {
+        args: ["bar"],
+        target: {
+          name: "foo",
+          constructor: DecorumSubject.prototype,
+          params: {},
+          return: undefined
+        }
+      })
+    ]);
   });
 });
