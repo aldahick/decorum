@@ -68,4 +68,27 @@ describe("MethodDecorum", () => {
       })
     ]);
   });
+  it("should include parameters", () => {
+    const decorum = new MethodDecorum();
+    class DecorumSubject {
+      @decorum.decorator()
+      // ignore console.log
+      // tslint:disable-next-line
+      foo(a: number, b: string, c: {}) { console.log(a, b, c); }
+    }
+    expect(decorum.uses).to.deep.equal([
+      getBaseEquivalencyClass(decorum, {
+        target: {
+          name: "foo",
+          constructor: DecorumSubject.prototype,
+          params: {
+            "a": Number,
+            "b": String,
+            "c": Object
+          },
+          return: undefined
+        }
+      })
+    ]);
+  });
 });
