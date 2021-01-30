@@ -1,18 +1,17 @@
 import { expect } from "chai";
+
 import { MethodDecorum, MethodTarget } from "./MethodDecorum";
 
-function getBaseEquivalencyClass<Args extends any[], Return>(
+const getBaseEquivalencyClass = <Args extends unknown[], Return>(
   decorum: MethodDecorum<Args, Return>,
   partial: Partial<(typeof decorum)["uses"][0]> & {
-    target: MethodTarget
+    target: MethodTarget;
   }
-): (typeof decorum)["uses"][0] {
-  return {
-    result: undefined,
-    args: [] as any,
-    ...partial
-  };
-}
+): (typeof decorum)["uses"][0] => ({
+  result: undefined,
+  args: [] as unknown as Args,
+  ...partial
+});
 
 describe("MethodDecorum", () => {
   it("should work", () => {
@@ -54,7 +53,7 @@ describe("MethodDecorum", () => {
     const decorum = new MethodDecorum<[string]>();
     class DecorumSubject {
       @decorum.decorator("bar")
-      foo() { }
+      foo(): void { }
     }
     expect(decorum.uses).to.deep.equal([
       getBaseEquivalencyClass(decorum, {
@@ -72,9 +71,9 @@ describe("MethodDecorum", () => {
     const decorum = new MethodDecorum();
     class DecorumSubject {
       @decorum.decorator()
-      // ignore console.log
-      // tslint:disable-next-line
-      foo(a: number, b: string, c: {}) { console.log(a, b, c); }
+      foo(a: number, b: string, c: {}): void {
+        console.log(a, b, c);
+      }
     }
     expect(decorum.uses).to.deep.equal([
       getBaseEquivalencyClass(decorum, {
@@ -82,9 +81,9 @@ describe("MethodDecorum", () => {
           name: "foo",
           constructor: DecorumSubject.prototype,
           params: {
-            "a": Number,
-            "b": String,
-            "c": Object
+            a: Number,
+            b: String,
+            c: Object
           },
           return: undefined
         }

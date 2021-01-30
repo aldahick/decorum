@@ -1,8 +1,0 @@
-{
-  "extends": [
-    "@aldahick/tslint-rules/tslint.nodejs.json"
-  ],
-  "rules": {
-    "ordered-imports": true
-  }
-}

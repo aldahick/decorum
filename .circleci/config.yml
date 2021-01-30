@@ -1,33 +1,113 @@
-version: 2
-jobs:
-  build:
+version: 2.1
+
+executors:
+  node:
     docker:
-      - image: circleci/node:10.15
+      - image: cimg/node:14
+
+workflows:
+  main:
+    jobs:
+      - install_dependencies:
+          filters:
+            tags:
+              only: /^v.*/
+      - lint:
+          requires:
+            - install_dependencies
+          filters:
+            tags:
+              only: /^v.*/
+      - build:
+          requires:
+            - install_dependencies
+          filters:
+            tags:
+              only: /^v.*/
+      - test:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+      - publish:
+          context: ah-global
+          requires:
+            - lint
+            - build
+            - test
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+jobs:
+  install_dependencies:
+    executor: node
     steps:
       - checkout
       - restore_cache:
           keys:
-          - dependencies-{{ checksum "package.json" }}
-          - dependencies-
+            - v1-deps-{{ checksum "yarn.lock" }}
+            - v1-deps
       - run:
-          name: Install NPM modules
-          command: npm i
+          name: Install dependencies
+          command: yarn --frozen-lockfile
       - save_cache:
           paths:
             - node_modules
-          key: dependencies-{{ checksum "package.json" }}
-      - run:
-          name: Compile
-          command: npm run compile
+          key: v1-deps-{{ checksum "yarn.lock" }}
+      - persist_to_workspace:
+          root: .
+          paths:
+            - node_modules
+  lint:
+    executor: node
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
       - run:
           name: Lint
-          command: npm run lint
+          command: yarn lint
+  build:
+    executor: node
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
       - run:
-          name: Unit Tests
+          name: Build
+          command: yarn build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
+  test:
+    executor: node
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Test
           command: npm run test -- --reporter=mocha-junit-reporter
           environment:
             MOCHA_FILE: /home/circleci/junit/test-results.xml
       - store_test_results:
           path: /home/circleci/junit
-      - store_artifacts:
-          path: /home/circleci/junit
+  publish:
+    executor: node
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Authenticate NPM
+          command: |
+            npm set registry https://$NPM_REGISTRY
+            echo "//$NPM_REGISTRY/:_authToken=$NPM_TOKEN" > .npmrc
+      - run:
+          name: Publish
+          command: npm publish --access public

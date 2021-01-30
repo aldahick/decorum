@@ -1,26 +1,28 @@
-import getParameterNames = require("get-parameter-names");
+import getParameterNames from "get-parameter-names";
+
 import { BaseDecorum } from "./BaseDecorum";
 
-export type MethodTarget = {
+export interface MethodTarget {
   name: string;
-  constructor: any;
+  constructor: Object;
   params: {[key: string]: Function};
   return?: Function;
-};
+}
 
-export class MethodDecorum<Args extends any[] = [], ProcessResult = undefined>
+export class MethodDecorum<Args extends unknown[] = [], ProcessResult = undefined>
   extends BaseDecorum<MethodTarget, MethodDecorator, Args, ProcessResult> {
-  decorator = (...args: Args) => (constructor: any, name: string | symbol) => {
+  decorator = (...args: Args) => (constructor: Object, name: string | symbol): void => {
     const params: {[key: string]: Function} = {};
-    const paramTypes: Function[] = Reflect.getMetadata("design:paramtypes", constructor, name);
-    getParameterNames(constructor[name]).forEach((name, i) =>
-      params[name] = paramTypes[i]
+    const paramTypes = Reflect.getMetadata("design:paramtypes", constructor, name) as Function[];
+    const func = (constructor as unknown as {[key: string]: Function})[name.toString()];
+    getParameterNames(func).forEach((paramName, i) =>
+      params[paramName] = paramTypes[i]
     );
     this.addUse({
       name: name.toString(),
       constructor,
       params,
-      return: Reflect.getMetadata("design:returntype", constructor, name)
+      return: Reflect.getMetadata("design:returntype", constructor, name) as Function
     }, args);
-  }
+  };
 }

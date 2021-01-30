@@ -1,24 +1,23 @@
 import { expect } from "chai";
+
 import { ClassDecorum, ClassTarget } from "./ClassDecorum";
 
-function getBaseEquivalencyClass<Args extends any[], Return>(
+const getBaseEquivalencyClass = <Args extends unknown[], Return>(
   decorum: ClassDecorum<Args, Return>,
   subject: Function,
   partial: Partial<(typeof decorum)["uses"][0]> = {},
   partialTarget: Partial<ClassTarget> = {}
-): (typeof decorum)["uses"][0] {
-  return {
-    result: undefined,
-    args: [] as any,
-    target: {
-      name: subject.name,
-      constructor: subject,
-      methodNames: [],
-      ...partialTarget
-    },
-    ...partial
-  };
-}
+): (typeof decorum)["uses"][0] => ({
+  result: undefined,
+  args: [] as unknown as Args,
+  target: {
+    name: subject.name,
+    constructor: subject,
+    methodNames: [],
+    ...partialTarget
+  },
+  ...partial
+});
 
 describe("ClassDecorum", () => {
   it("should work", () => {
